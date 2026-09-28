@@ -1,0 +1,436 @@
+/*
+ * 学習ツールで使うデータ（辞書・サンプル画像・練習問題・初期テキスト）
+ */
+(function (global) {
+  'use strict';
+
+  // コードフェンス記号をテンプレート文字列内に書きやすくするため
+  var F = '```';
+
+  /* ---------- サンプル画像 ---------- */
+  var SAMPLE_IMAGES = [
+    { file: 'images/sample-cat.svg', alt: 'ねこのイラスト', size: '480 × 320' },
+    { file: 'images/sample-mountain.svg', alt: '山の風景', size: '480 × 320' },
+    { file: 'images/sample-coffee.svg', alt: 'コーヒーカップ', size: '320 × 320' },
+    { file: 'images/sample-flower.svg', alt: 'お花', size: '320 × 320' },
+    { file: 'images/sample-city.svg', alt: '夜の街並み', size: '480 × 320' },
+    { file: 'images/sample-banner.svg', alt: '横長のバナー', size: '800 × 200' },
+    { file: 'images/icon-star.svg', alt: '星のアイコン', size: '64 × 64' }
+  ];
+
+  /* ---------- マークダウン辞書 ---------- */
+  // md: 記法の例 / note: 補足・注意点
+  var DICTIONARY = [
+    {
+      category: '見出し',
+      items: [
+        {
+          title: '見出し（# 記法）',
+          desc: '行頭に # を書き、半角スペースを空けて文字を書きます。# の数（1〜6）が見出しのレベルです。',
+          md: '# 見出し1\n## 見出し2\n### 見出し3\n#### 見出し4\n##### 見出し5\n###### 見出し6',
+          note: '「#見出し」のようにスペースが無い、または全角スペースだと見出しになりません。'
+        },
+        {
+          title: '見出し（下線記法）',
+          desc: '文字の次の行に = や - を並べても見出し1・見出し2になります。',
+          md: '大きな見出し\n==========\n\n中くらいの見出し\n----------------',
+          note: '段落の直後に --- を書くと水平線ではなく見出しになってしまうので、水平線の前には空行を入れましょう。'
+        }
+      ]
+    },
+    {
+      category: '段落と改行',
+      items: [
+        {
+          title: '段落',
+          desc: '空行（何も書かない行）をはさむと、新しい段落になります。',
+          md: '1つ目の段落です。\n\n2つ目の段落です。'
+        },
+        {
+          title: '改行',
+          desc: 'ただ改行しただけでは、表示上は同じ行につながります。改行したいときは行末にスペースを2つ入れるか、バックスラッシュ \\ を書きます。',
+          md: 'ただ改行した行\nはつながります。\n\n行末にスペース2つ  \nで改行されます。\n\n行末にバックスラッシュ\\\nでも改行されます。',
+          note: '上部の「改行をそのまま反映」をオンにすると、GitHub のコメント欄のように普通の改行がそのまま反映されます。'
+        }
+      ]
+    },
+    {
+      category: '文字の装飾',
+      items: [
+        {
+          title: '太字',
+          desc: '** か __ で囲むと太字になります。',
+          md: 'これは **太字** です。\nこれも __太字__ です。'
+        },
+        {
+          title: '斜体',
+          desc: '* か _ を1つずつで囲むと斜体になります。',
+          md: 'これは *斜体* です。\nこれも _斜体_ です。',
+          note: '日本語のフォントでは斜体があまり傾かないことがあります。'
+        },
+        {
+          title: '太字 + 斜体',
+          desc: '*** で囲むと太字と斜体を同時にかけられます。組み合わせて入れ子にもできます。',
+          md: '***太字で斜体***\n**太字の中に *斜体* を入れる**'
+        },
+        {
+          title: '打ち消し線',
+          desc: '~~ で囲むと打ち消し線が引かれます（GitHub などの拡張記法）。',
+          md: '価格: ~~1,000円~~ 800円'
+        },
+        {
+          title: 'ハイライト',
+          desc: '== で囲むと蛍光ペンのような強調になります（Obsidian / Typora などの拡張記法。GitHub では使えません）。',
+          md: 'ここが ==大事なところ== です。'
+        }
+      ]
+    },
+    {
+      category: '箇条書き',
+      items: [
+        {
+          title: '番号なしリスト',
+          desc: '行頭に - か * か + を書き、半角スペースを空けます。',
+          md: '- りんご\n- みかん\n- ぶどう'
+        },
+        {
+          title: '番号付きリスト',
+          desc: '行頭に「数字 + ピリオド + スペース」を書きます。',
+          md: '1. 材料を用意する\n2. 混ぜる\n3. 焼く'
+        },
+        {
+          title: '番号は自動で振られる',
+          desc: '全部 1. と書いても、表示では 1, 2, 3… と自動で番号が振られます。最初の番号から始まります。',
+          md: '1. 最初\n1. 次\n1. 最後\n\n―\n\n3. 3から始まる\n4. 次'
+        },
+        {
+          title: '入れ子（ネスト）',
+          desc: '子の項目は、スペース2つ（番号付きなら3つ）ほど字下げします。',
+          md: '- 果物\n  - りんご\n  - みかん\n- 野菜\n  1. にんじん\n  2. たまねぎ',
+          note: '字下げが足りないと、同じ階層の項目として扱われます。'
+        },
+        {
+          title: 'チェックリスト（タスクリスト）',
+          desc: '- の後に [ ] や [x] を書くとチェックボックスになります（GitHub などの拡張記法）。',
+          md: '- [x] 見出しを覚える\n- [x] リストを覚える\n- [ ] 表を覚える'
+        }
+      ]
+    },
+    {
+      category: '表（テーブル）',
+      items: [
+        {
+          title: '表の基本',
+          desc: '| で列を区切ります。2行目に --- を書いて、見出し行と中身を分けます。',
+          md: '| 名前 | 年齢 | 趣味 |\n| --- | --- | --- |\n| 太郎 | 20 | 読書 |\n| 花子 | 22 | 映画 |',
+          note: '列の幅はそろえなくても大丈夫です。2行目の区切り行の列数は見出し行と同じにします。'
+        },
+        {
+          title: '列の揃え（左・中央・右）',
+          desc: '区切り行の --- に : を付けると文字の揃え方を変えられます。',
+          md: '| 左寄せ | 中央 | 右寄せ |\n| :--- | :---: | ---: |\n| a | b | 100 |\n| aaa | bbb | 2,000 |'
+        },
+        {
+          title: '表の中で装飾',
+          desc: 'セルの中でも太字やリンク、コードが使えます。| を文字として使うときは \\| と書きます。',
+          md: '| 記法 | 説明 |\n| --- | --- |\n| **太字** | `**文字**` |\n| a \\| b | 縦棒を表示 |'
+        }
+      ]
+    },
+    {
+      category: 'リンク',
+      items: [
+        {
+          title: 'リンク',
+          desc: '[表示する文字](URL) と書きます。角かっこ [] が先、丸かっこ () が後です。',
+          md: '[Example のサイト](https://example.com)',
+          note: '(文字)[URL] のように順番を逆にするとリンクになりません。「[見える文字](行き先)」と覚えましょう。'
+        },
+        {
+          title: 'タイトル付きリンク',
+          desc: 'URL の後にスペースを空けて "タイトル" を書くと、マウスを乗せたときに表示されます。',
+          md: '[Example](https://example.com "例示用のサイトです")'
+        },
+        {
+          title: 'URL をそのままリンクにする',
+          desc: '< > で囲むか、https:// から始まる URL をそのまま書くと自動でリンクになります。',
+          md: '<https://example.com>\n\nhttps://example.com/page'
+        },
+        {
+          title: '参照リンク',
+          desc: 'URL を文章の外にまとめて書けます。長い URL を何度も使うときに便利です。',
+          md: '[検索サイト][search] と [example] を参照。\n\n[search]: https://www.google.com\n[example]: https://example.com'
+        },
+        {
+          title: 'ページ内リンク',
+          desc: '# の後に見出しの文字を書くと、ページ内の見出しへ移動するリンクになります。英字は小文字、スペースは - に置き換えます。',
+          md: '[リンクの章へ](#リンクの章)\n\n## リンクの章'
+        }
+      ]
+    },
+    {
+      category: '画像',
+      items: [
+        {
+          title: '画像',
+          desc: '![代替テキスト](画像のパスやURL) と書きます。リンクの前に ! を付けた形です。',
+          md: '![ねこのイラスト](images/sample-cat.svg)',
+          note: '代替テキストは画像が表示できないときや、読み上げソフトで読まれる説明文です。右パネルの「画像」タブにサンプル画像があります。'
+        },
+        {
+          title: 'タイトル付き画像',
+          desc: 'リンクと同じく "タイトル" を付けられます。',
+          md: '![コーヒー](images/sample-coffee.svg "休憩しましょう")'
+        },
+        {
+          title: '画像をリンクにする',
+          desc: '画像の記法を、リンクの [ ] の中に入れます。',
+          md: '[![星](images/icon-star.svg)](https://example.com)'
+        }
+      ]
+    },
+    {
+      category: '水平線',
+      items: [
+        {
+          title: '水平線',
+          desc: '- か * か _ を3つ以上並べると区切り線になります。',
+          md: '上の文章\n\n---\n\n***\n\n___\n\n下の文章',
+          note: '文章のすぐ下に --- を書くと見出しになります。前に空行を入れましょう。'
+        }
+      ]
+    },
+    {
+      category: '引用',
+      items: [
+        {
+          title: '引用',
+          desc: '行頭に > を書きます。',
+          md: '> 吾輩は猫である。\n> 名前はまだ無い。'
+        },
+        {
+          title: '入れ子の引用',
+          desc: '> を重ねると、引用の中の引用になります。中で他の記法も使えます。',
+          md: '> 外側の引用\n>\n>> 内側の引用\n>\n> - 引用の中のリスト\n> - **太字** も使えます'
+        },
+        {
+          title: 'アラート（注意書き）',
+          desc: '引用の1行目に [!NOTE] などを書くと、色付きの注意書きになります（GitHub の拡張記法）。NOTE / TIP / IMPORTANT / WARNING / CAUTION があります。',
+          md: '> [!NOTE]\n> 補足情報です。\n\n> [!WARNING]\n> 注意が必要です。'
+        }
+      ]
+    },
+    {
+      category: 'コード',
+      items: [
+        {
+          title: 'インラインコード',
+          desc: '文章中のコードは ` （バッククォート）で囲みます。中では記法が働きません。',
+          md: '`console.log()` を使います。`**太字にならない**`'
+        },
+        {
+          title: 'コードブロック',
+          desc: '``` の行で前後を囲みます。``` の後に言語名を書くこともできます。',
+          md: F + 'js\nfunction hello() {\n  console.log("Hello!");\n}\n' + F
+        },
+        {
+          title: 'インデントのコードブロック',
+          desc: '行頭にスペースを4つ入れても、コードブロックになります。',
+          md: '通常の文章\n\n    スペース4つで始まる行\n    はコードになります'
+        }
+      ]
+    },
+    {
+      category: '脚注',
+      items: [
+        {
+          title: '脚注',
+          desc: '本文に [^名前] を書き、文章の外に [^名前]: 内容 を書くと、ページの最後に注釈がまとめられます。',
+          md: 'マークダウン[^1]は便利です。\n\n[^1]: 2004年に John Gruber が考案した記法です。'
+        }
+      ]
+    },
+    {
+      category: 'その他',
+      items: [
+        {
+          title: 'エスケープ',
+          desc: '記号の前に \\ を書くと、記法として扱われずそのまま表示されます。',
+          md: '\\*アスタリスク\\* や \\# をそのまま表示'
+        },
+        {
+          title: '一部の HTML タグ',
+          desc: 'このツールでは <kbd> <sup> <sub> <br> <mark> <u> などのタグが使えます（環境によって使えるタグは異なります）。',
+          md: '<kbd>Ctrl</kbd> + <kbd>C</kbd> でコピー\n\nH<sub>2</sub>O と x<sup>2</sup>\n\n1行目<br>2行目'
+        },
+        {
+          title: 'コメント',
+          desc: '<!-- と --> で囲んだ部分は表示されません。メモを残すのに使えます。',
+          md: '表示される文章\n<!-- これは表示されないメモ -->'
+        },
+        {
+          title: '絵文字',
+          desc: ':名前: の形で絵文字を入れられます（GitHub などの拡張記法。このツールではよく使うものに対応）。',
+          md: ':smile: :+1: :tada: :warning: :memo: :rocket:'
+        }
+      ]
+    }
+  ];
+
+  /* ---------- 練習問題 ---------- */
+  // check(preview) はプレビュー要素を受け取り、条件を満たせば true を返す
+  var PRACTICE = [
+    {
+      title: '見出し1を書こう',
+      desc: '# を使って一番大きな見出しを書いてみましょう。',
+      example: '# はじめてのマークダウン',
+      check: function (p) { return !!p.querySelector('h1'); }
+    },
+    {
+      title: '見出し2を書こう',
+      desc: '## を使って小見出しを書いてみましょう。',
+      example: '## 自己紹介',
+      check: function (p) { return !!p.querySelector('h2'); }
+    },
+    {
+      title: '太字にしよう',
+      desc: '文章の一部を ** で囲んで太字にしましょう。',
+      example: 'これは **とても大事** です。',
+      check: function (p) { return !!p.querySelector('strong'); }
+    },
+    {
+      title: '斜体にしよう',
+      desc: '文章の一部を * で囲んで斜体にしましょう。',
+      example: 'これは *ちょっと強調* です。',
+      check: function (p) { return !!p.querySelector('em'); }
+    },
+    {
+      title: '番号なしリストを3項目以上',
+      desc: '- を使って、項目が3つ以上ある箇条書きを作りましょう。',
+      example: '- りんご\n- みかん\n- ぶどう',
+      check: function (p) {
+        return Array.prototype.some.call(p.querySelectorAll('ul'), function (ul) {
+          return ul.querySelectorAll(':scope > li').length >= 3;
+        });
+      }
+    },
+    {
+      title: '番号付きリストを作ろう',
+      desc: '1. 2. 3. と番号付きの手順を書きましょう。',
+      example: '1. 起きる\n2. 顔を洗う\n3. 朝ごはん',
+      check: function (p) { return !!p.querySelector('ol > li'); }
+    },
+    {
+      title: 'リストを入れ子にしよう',
+      desc: 'リストの項目の下に、字下げした子の項目を作りましょう。',
+      example: '- 果物\n  - りんご\n  - みかん',
+      check: function (p) { return !!p.querySelector('li ul, li ol'); }
+    },
+    {
+      title: 'リンクを貼ろう',
+      desc: '[文字](URL) の形で、Web サイトへのリンクを作りましょう。',
+      example: '[Example](https://example.com)',
+      check: function (p) { return !!p.querySelector('a[href^="http"]:not(.autolink)'); }
+    },
+    {
+      title: '画像を表示しよう',
+      desc: '「画像」タブのサンプル画像を ![代替テキスト](パス) で表示しましょう。',
+      example: '![ねこ](images/sample-cat.svg)',
+      check: function (p) {
+        return Array.prototype.some.call(p.querySelectorAll('img'), function (img) {
+          return img.getAttribute('alt') !== '' && img.getAttribute('src');
+        });
+      }
+    },
+    {
+      title: '表を作ろう（2列以上）',
+      desc: '| と --- を使って、見出し行のある表を作りましょう。',
+      example: '| 名前 | 好きな食べ物 |\n| --- | --- |\n| 太郎 | カレー |',
+      check: function (p) {
+        var t = p.querySelector('table');
+        return !!t && t.querySelectorAll('th').length >= 2 && !!t.querySelector('tbody tr');
+      }
+    },
+    {
+      title: '水平線を引こう',
+      desc: '空行の後に --- を書いて区切り線を入れましょう。',
+      example: '\n---\n',
+      check: function (p) {
+        return Array.prototype.some.call(p.querySelectorAll('hr'), function (hr) {
+          return !hr.closest('.footnotes');
+        });
+      }
+    },
+    {
+      title: '引用を書こう',
+      desc: '> を使って引用文を書きましょう。',
+      example: '> 継続は力なり',
+      check: function (p) { return !!p.querySelector('blockquote'); }
+    },
+    {
+      title: 'コードを書こう',
+      desc: '` で囲んだインラインコードか、``` のコードブロックを書きましょう。',
+      example: '`print("hello")` と入力します。',
+      check: function (p) { return !!p.querySelector('code'); }
+    }
+  ];
+
+  /* ---------- 初期テキスト（チュートリアル） ---------- */
+  var TUTORIAL = [
+    '# マークダウン練習帳へようこそ :wave:',
+    '',
+    '左側の **書き込み画面** に入力すると、右側の **プレビュー画面** にすぐ反映されます。',
+    'この文章を書き換えたり消したりして、自由に試してみましょう。',
+    '',
+    '> [!TIP]',
+    '> 右上の「辞書」「画像」「練習」ボタンから、記法の一覧・サンプル画像・練習問題を開けます。',
+    '',
+    '## 文字の装飾',
+    '',
+    '**太字** や *斜体*、***太字で斜体***、~~打ち消し線~~ が使えます。',
+    '',
+    '## 箇条書き',
+    '',
+    '- 番号なしのリスト',
+    '- 項目を並べるときに使います',
+    '  - スペース2つで字下げすると入れ子になります',
+    '',
+    '1. 番号付きのリスト',
+    '2. 手順を書くときに便利',
+    '3. 番号は自動で振られます',
+    '',
+    '## 表',
+    '',
+    '| 記法 | 意味 | 例 |',
+    '| :--- | :---: | ---: |',
+    '| `#` | 見出し | `# タイトル` |',
+    '| `**` | 太字 | `**強調**` |',
+    '| `-` | 箇条書き | `- 項目` |',
+    '',
+    '## リンクと画像',
+    '',
+    '[Example のサイト](https://example.com) へのリンクです。',
+    '',
+    '![ねこのイラスト](images/sample-cat.svg)',
+    '',
+    '---',
+    '',
+    '## コード',
+    '',
+    '文章中のコードは `console.log()` のように書きます。',
+    '',
+    F + 'js',
+    'const message = "Hello, Markdown!";',
+    'console.log(message);',
+    F,
+    '',
+    'ファイルは上部の「開く」「ダウンロード」ボタンで .md として読み書きできます。'
+  ].join('\n');
+
+  global.MDLearnData = {
+    SAMPLE_IMAGES: SAMPLE_IMAGES,
+    DICTIONARY: DICTIONARY,
+    PRACTICE: PRACTICE,
+    TUTORIAL: TUTORIAL
+  };
+})(window);

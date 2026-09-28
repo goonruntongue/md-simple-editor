@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+  <rect width="320" height="320" fill="#efe6dd"/>
+  <ellipse cx="160" cy="250" rx="120" ry="24" fill="#d6c3b0"/>
+  <path d="M80 130 L240 130 L225 245 Q160 265 95 245 Z" fill="#ffffff" stroke="#6f4e37" stroke-width="6"/>
+  <path d="M238 150 q50 5 40 45 q-8 30 -48 30" stroke="#6f4e37" stroke-width="10" fill="none"/>
+  <ellipse cx="160" cy="132" rx="78" ry="14" fill="#6f4e37"/>
+  <path d="M130 105 q-15 -20 0 -40 q15 -20 0 -40 M165 105 q-15 -20 0 -40 q15 -20 0 -40 M200 105 q-15 -20 0 -40 q15 -20 0 -40" stroke="#b8a898" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <text x="14" y="306" font-family="sans-serif" font-size="16" fill="#6f4e37">sample-coffee.svg</text>
+</svg>

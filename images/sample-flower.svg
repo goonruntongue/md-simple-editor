@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+  <rect width="320" height="320" fill="#f1faee"/>
+  <path d="M160 170 Q150 240 160 300" stroke="#52b788" stroke-width="8" fill="none"/>
+  <path d="M158 250 q-50 -10 -60 -45 q45 0 60 45 Z" fill="#74c69d"/>
+  <path d="M162 225 q50 -10 60 -45 q-45 0 -60 45 Z" fill="#74c69d"/>
+  <g transform="translate(160 120)" fill="#ff8fab">
+    <ellipse cx="0" cy="-48" rx="26" ry="40"/>
+    <ellipse cx="0" cy="-48" rx="26" ry="40" transform="rotate(72)"/>
+    <ellipse cx="0" cy="-48" rx="26" ry="40" transform="rotate(144)"/>
+    <ellipse cx="0" cy="-48" rx="26" ry="40" transform="rotate(216)"/>
+    <ellipse cx="0" cy="-48" rx="26" ry="40" transform="rotate(288)"/>
+    <circle r="26" fill="#ffd166"/>
+  </g>
+  <text x="14" y="306" font-family="sans-serif" font-size="16" fill="#2d6a4f">sample-flower.svg</text>
+</svg>
