@@ -2,7 +2,7 @@
  * Service Worker - オフラインでも使えるようにアプリの部品をキャッシュする
  * ファイルを更新したら CACHE の番号を上げると、古いキャッシュが入れ替わります。
  */
-var CACHE = 'md-learn-v1';
+var CACHE = 'md-learn-v2';
 var ASSETS = [
   './',
   'index.html',
