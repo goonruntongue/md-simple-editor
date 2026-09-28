@@ -593,6 +593,8 @@
   function setTheme(theme) {
     var dark = theme !== 'light';
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#171b21' : '#ffffff'); // スマホのステータスバーの色
     var btn = $('#btn-theme');
     var label = dark ? 'ライトモードに切り替え' : 'ダークモードに切り替え';
     btn.textContent = dark ? '☀️' : '🌙';
