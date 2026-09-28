@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>マークダウン練習帳</title>
+  <script>
+    // 画面のちらつきを防ぐため、CSS より前に保存済みのテーマを反映する（既定はダーク）
+    try {
+      var saved = JSON.parse(localStorage.getItem('mdlearn.v1') || '{}');
+      if (saved.theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    } catch (e) { /* 既定のダークのまま */ }
+    // PWA の設定は http(s) で開いたときだけ読み込む（file:// では使えないため）
+    if (/^https?:$/.test(location.protocol)) {
+      document.write('<link rel="manifest" href="manifest.webmanifest">');
+    }
+  </script>
+  <meta name="description" content="ブラウザでマークダウンの書き方を学べるエディター。辞書・サンプル画像・練習問題付き。">
+  <meta name="theme-color" content="#171b21">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MD練習帳">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="icon" type="image/svg+xml" href="images/app-icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img class="brand-mark" src="images/app-icon.svg" alt="" width="32" height="32">
+      <span class="brand-name">マークダウン練習帳</span>
+      <button type="button" class="btn btn-small" id="btn-about">❔ マークダウンとは</button>
+      <button type="button" class="btn btn-small btn-ghost" id="btn-tour" title="使い方ガイドをもう一度見る">🧭 ガイド</button>
+    </div>
+
+    <div class="header-group" role="group" aria-label="ファイル操作">
+      <button type="button" class="btn" id="btn-new" title="内容を空にします">新規</button>
+      <button type="button" class="btn" id="btn-open" title=".md ファイルを読み込みます（エディタへのドラッグ＆ドロップも可）">開く</button>
+      <input type="file" id="file-input" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+      <label class="filename-field">
+        <span class="visually-hidden">ファイル名</span>
+        <input type="text" id="filename" value="document.md" spellcheck="false" aria-label="ファイル名">
+      </label>
+      <button type="button" class="btn btn-primary" id="btn-save" title="Ctrl + S">ダウンロード</button>
+      <button type="button" class="btn" id="btn-export" title="プレビューを HTML ファイルとして保存します">HTML出力</button>
+      <button type="button" class="btn" id="btn-sample" title="最初の説明文を読み込みます">サンプル</button>
+    </div>
+
+    <div class="header-group" role="group" aria-label="表示">
+      <div class="segmented" role="radiogroup" aria-label="表示モード">
+        <button type="button" data-view="edit" role="radio">書く</button>
+        <button type="button" data-view="split" role="radio">両方</button>
+        <button type="button" data-view="preview" role="radio">見る</button>
+      </div>
+      <button type="button" class="btn theme-toggle" id="btn-theme" aria-label="ライトモードに切り替え" title="ライトモードに切り替え">☀️</button>
+      <button type="button" class="btn btn-tab" data-panel="dict">📖 辞書</button>
+      <button type="button" class="btn btn-tab" data-panel="images">🖼 画像</button>
+      <button type="button" class="btn btn-tab" data-panel="practice">✏️ 練習 <span class="badge" id="practice-badge">0/0</span></button>
+    </div>
+  </header>
+
+  <main class="workspace" id="workspace" data-view="split">
+    <section class="pane editor-pane" aria-label="書き込み画面">
+      <div class="pane-head">
+        <h2 class="pane-title">書き込み</h2>
+        <span class="pane-meta" id="stats"></span>
+      </div>
+      <div class="toolbar" role="toolbar" aria-label="記法の挿入">
+        <button type="button" data-cmd="h1" title="見出し1">H1</button>
+        <button type="button" data-cmd="h2" title="見出し2">H2</button>
+        <button type="button" data-cmd="h3" title="見出し3">H3</button>
+        <span class="sep"></span>
+        <button type="button" data-cmd="bold" title="太字 (Ctrl+B)"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="斜体 (Ctrl+I)"><i>I</i></button>
+        <button type="button" data-cmd="strike" title="打ち消し線"><s>S</s></button>
+        <button type="button" data-cmd="code" title="インラインコード">&lt;/&gt;</button>
+        <span class="sep"></span>
+        <button type="button" data-cmd="ul" title="番号なしリスト">• リスト</button>
+        <button type="button" data-cmd="ol" title="番号付きリスト">1. リスト</button>
+        <button type="button" data-cmd="task" title="チェックリスト">☑</button>
+        <span class="sep"></span>
+        <button type="button" data-cmd="link" title="リンク (Ctrl+K)">🔗 リンク</button>
+        <button type="button" data-cmd="image" title="画像">🖼 画像</button>
+        <button type="button" data-cmd="table" title="表">▦ 表</button>
+        <span class="sep"></span>
+        <button type="button" data-cmd="quote" title="引用">❝ 引用</button>
+        <button type="button" data-cmd="codeblock" title="コードブロック">{ } コード</button>
+        <button type="button" data-cmd="hr" title="水平線">― 線</button>
+      </div>
+      <div class="editor-wrap" id="editor-wrap">
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+          aria-label="マークダウン入力欄" placeholder="ここにマークダウンを書いてみましょう。例: # 見出し"></textarea>
+        <div class="drop-overlay" aria-hidden="true">.md ファイルをドロップして開く</div>
+      </div>
+    </section>
+
+    <section class="pane preview-pane" aria-label="プレビュー画面">
+      <div class="pane-head">
+        <h2 class="pane-title">プレビュー</h2>
+        <label class="check"><input type="checkbox" id="opt-breaks"> 改行をそのまま反映</label>
+        <label class="check"><input type="checkbox" id="opt-sync" checked> スクロール同期</label>
+      </div>
+      <div class="hints" id="hints" hidden></div>
+      <div class="preview-scroll" id="preview-scroll">
+        <article class="markdown-body" id="preview"></article>
+      </div>
+    </section>
+
+    <aside class="sidebar" id="sidebar" aria-label="学習パネル" hidden>
+      <div class="sidebar-head">
+        <div class="sidebar-tabs" role="tablist">
+          <button type="button" role="tab" data-panel="dict">📖 辞書</button>
+          <button type="button" role="tab" data-panel="images">🖼 画像</button>
+          <button type="button" role="tab" data-panel="practice">✏️ 練習</button>
+        </div>
+        <button type="button" class="icon-btn" id="sidebar-close" aria-label="パネルを閉じる">✕</button>
+      </div>
+
+      <div class="panel" id="panel-dict" role="tabpanel">
+        <div class="panel-intro">
+          <input type="search" id="dict-search" placeholder="記法を検索（例: 表, リンク, #）" aria-label="辞書を検索">
+          <nav class="dict-nav" id="dict-nav" aria-label="カテゴリ"></nav>
+        </div>
+        <div class="panel-body" id="dict-list"></div>
+      </div>
+
+      <div class="panel" id="panel-images" role="tabpanel" hidden>
+        <div class="panel-body">
+          <p class="panel-lead">
+            下のサンプル画像を使って、画像の表示を試せます。「挿入」を押すとカーソル位置に記法が入ります。
+          </p>
+          <pre class="syntax-box">![代替テキスト](画像のパス)</pre>
+          <p class="panel-note">
+            ※ パスは <code>index.html</code> からの相対パスです。ダウンロードした .md を別の場所で開くと、画像が表示されない場合があります。
+            <code>https://</code> から始まる Web 上の画像の URL も使えます。
+          </p>
+          <div class="image-grid" id="image-grid"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-practice" role="tabpanel" hidden>
+        <div class="panel-body">
+          <p class="panel-lead">プレビューに条件どおりの要素が表示されると、自動でクリアになります。</p>
+          <div class="progress" aria-hidden="true"><div class="progress-bar" id="practice-bar"></div></div>
+          <p class="progress-label" id="practice-label"></p>
+          <ol class="practice-list" id="practice-list"></ol>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <dialog class="about-dialog" id="about-dialog" aria-labelledby="about-title">
+    <div class="about-head">
+      <span id="about-title">マークダウンとは</span>
+      <button type="button" class="icon-btn" id="about-close" aria-label="閉じる">✕</button>
+    </div>
+    <article class="markdown-body about-body" id="about-body"></article>
+  </dialog>
+
+  <div class="tour" id="tour" hidden>
+    <div class="tour-spot" id="tour-spot"></div>
+    <div class="tour-bubble" id="tour-bubble" role="dialog" aria-live="polite" aria-labelledby="tour-title">
+      <p class="tour-step" id="tour-step"></p>
+      <h3 class="tour-title" id="tour-title"></h3>
+      <p class="tour-text" id="tour-text"></p>
+      <p class="tour-wait" id="tour-wait"></p>
+      <div class="tour-actions">
+        <button type="button" class="btn btn-small btn-ghost" id="tour-skip">スキップ</button>
+        <button type="button" class="btn btn-small btn-primary" id="tour-next">次へ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/markdown.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // PWA: オフラインでも使えるように Service Worker を登録（file:// では登録しない）
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () { /* 失敗しても通常どおり使える */ });
+      });
+    }
+  </script>
+</body>
+</html>

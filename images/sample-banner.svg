@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4361ee"/>
+      <stop offset="1" stop-color="#7209b7"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" fill="url(#g)"/>
+  <circle cx="700" cy="40" r="90" fill="#fff" opacity="0.08"/>
+  <circle cx="90" cy="190" r="70" fill="#fff" opacity="0.08"/>
+  <text x="400" y="105" text-anchor="middle" font-family="sans-serif" font-size="44" font-weight="bold" fill="#fff"># Markdown</text>
+  <text x="400" y="150" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#dcd6ff">sample-banner.svg (800 × 200)</text>
+</svg>
