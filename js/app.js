@@ -588,6 +588,23 @@
     toast(name + ' を書き出しました');
   });
 
+  /* ---------- テーマ（ダーク / ライト） ---------- */
+
+  function setTheme(theme) {
+    var dark = theme !== 'light';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    var btn = $('#btn-theme');
+    var label = dark ? 'ライトモードに切り替え' : 'ダークモードに切り替え';
+    btn.textContent = dark ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+    state.theme = dark ? 'dark' : 'light';
+    saveState();
+  }
+  $('#btn-theme').addEventListener('click', function () {
+    setTheme(state.theme === 'light' ? 'dark' : 'light');
+  });
+
   /* ---------- 表示モード ---------- */
 
   function setView(view) {
@@ -842,6 +859,7 @@
   if (state.filename) filenameInput.value = state.filename;
   editor.value = typeof state.content === 'string' ? state.content : DATA.TUTORIAL;
 
+  setTheme(state.theme || 'dark');
   setView(state.view || 'split');
   renderDictionary();
   render();

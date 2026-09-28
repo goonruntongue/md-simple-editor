@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>マークダウン練習帳</title>
+  <script>
+    // 画面のちらつきを防ぐため、CSS より前に保存済みのテーマを反映する（既定はダーク）
+    try {
+      var saved = JSON.parse(localStorage.getItem('mdlearn.v1') || '{}');
+      if (saved.theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    } catch (e) { /* 既定のダークのまま */ }
+  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -32,6 +39,7 @@
         <button type="button" data-view="split" role="radio">両方</button>
         <button type="button" data-view="preview" role="radio">見る</button>
       </div>
+      <button type="button" class="btn theme-toggle" id="btn-theme" aria-label="ライトモードに切り替え" title="ライトモードに切り替え">☀️</button>
       <button type="button" class="btn btn-tab" data-panel="dict">📖 辞書</button>
       <button type="button" class="btn btn-tab" data-panel="images">🖼 画像</button>
       <button type="button" class="btn btn-tab" data-panel="practice">✏️ 練習 <span class="badge" id="practice-badge">0/0</span></button>

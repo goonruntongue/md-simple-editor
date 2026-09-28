@@ -25,27 +25,26 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1216;
-    --surface: #171b21;
-    --surface-2: #1d232b;
-    --border: #2e3640;
-    --text: #e4e8ec;
-    --muted: #97a1ac;
-    --accent: #5b93f0;
-    --accent-soft: #1d2d4a;
-    --accent-text: #0b1220;
-    --success: #4ac26b;
-    --success-soft: #16301f;
-    --warn-soft: #2d2714;
-    --warn-border: #8a7424;
-    --code-bg: #242b34;
-    --pre-bg: #1d232b;
-    --mark: #5c5012;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 16px rgba(0, 0, 0, .3);
-    color-scheme: dark;
-  }
+/* ダークモード（既定）。<html data-theme="light"> でライトモード */
+:root[data-theme="dark"] {
+  --bg: #0f1216;
+  --surface: #171b21;
+  --surface-2: #1d232b;
+  --border: #2e3640;
+  --text: #e4e8ec;
+  --muted: #97a1ac;
+  --accent: #5b93f0;
+  --accent-soft: #1d2d4a;
+  --accent-text: #0b1220;
+  --success: #4ac26b;
+  --success-soft: #16301f;
+  --warn-soft: #2d2714;
+  --warn-border: #8a7424;
+  --code-bg: #242b34;
+  --pre-bg: #1d232b;
+  --mark: #5c5012;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 16px rgba(0, 0, 0, .3);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -122,6 +121,8 @@ button, input, textarea { font: inherit; color: inherit; }
 .btn-tab.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .btn-small { height: 28px; padding: 0 10px; font-size: 12px; }
 .btn-ghost { background: transparent; }
+
+.theme-toggle { min-width: 32px; justify-content: center; }
 
 .badge {
   display: inline-block;
