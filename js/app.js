@@ -634,6 +634,7 @@
     });
     state.panel = panel;
     saveState();
+    if (panel === 'practice') tourNotify('practice');
   }
 
   function closeSidebar() {
@@ -848,9 +849,174 @@
     if (practiceDone) {
       var newly = DATA.PRACTICE.filter(function (t, i) { return current[i] && !practiceDone[i]; });
       if (newly.length === 1) toast('✅ クリア: ' + newly[0].title);
+      if (newly.length) tourNotify('clear');
     }
     practiceDone = current;
   }
+
+  /* ---------- マークダウンとは ---------- */
+
+  var aboutDialog = $('#about-dialog');
+  $('#about-body').innerHTML = MD.render(DATA.ABOUT);
+  handleAnchors($('#about-body'));
+
+  function closeAbout() {
+    if (typeof aboutDialog.close === 'function') aboutDialog.close();
+    else aboutDialog.removeAttribute('open');
+  }
+  $('#btn-about').addEventListener('click', function () {
+    if (typeof aboutDialog.showModal === 'function') aboutDialog.showModal();
+    else aboutDialog.setAttribute('open', '');
+    $('#about-body').scrollTop = 0;
+  });
+  $('#about-close').addEventListener('click', closeAbout);
+  aboutDialog.addEventListener('click', function (e) {
+    if (e.target === aboutDialog) closeAbout(); // 背景クリックで閉じる
+  });
+
+  /* ---------- ツアーガイド ---------- */
+
+  var isNarrow = function () { return window.matchMedia('(max-width: 1100px)').matches; };
+
+  var TOUR_STEPS = [
+    {
+      target: function () { return workspace; },
+      title: 'ようこそ、マークダウン練習帳へ！',
+      text: '今は、使い方を説明した<b>サンプルの文章</b>が表示されています。左の<b>書き込み画面</b>に書いたマークダウンが、右の<b>プレビュー画面</b>で見やすく表示されます。'
+    },
+    {
+      target: function () { return $('#btn-new'); },
+      title: '新規作成してみましょう',
+      text: '<b>「新規」ボタン</b>を押すと、書き込み画面が白紙になり、自分で一から書き始められます。',
+      wait: '「新規」ボタンを押すと次に進みます',
+      waitFor: 'new'
+    },
+    {
+      target: function () { return $('.btn-tab[data-panel="practice"]'); },
+      title: '練習問題を出しましょう',
+      text: '<b>「練習」ボタン</b>を押すと、練習問題が表示されます。',
+      wait: '「練習」ボタンを押すと次に進みます',
+      waitFor: 'practice',
+      enter: function () {
+        if (!sidebar.hidden && state.panel === 'practice') tourNext();
+      }
+    },
+    {
+      target: function () { return !sidebar.hidden && isNarrow() ? sidebar : $('.editor-pane'); },
+      title: '問題に挑戦しましょう',
+      text: '練習問題に書かれている内容に従って、<b>書き込み画面</b>にマークダウンを書いてみましょう。条件を満たすと自動でクリアになります。わからないときは「ヒントを見る」を開いてみてください。',
+      narrowText: '（画面が狭いときは、パネル右上の ✕ で閉じると書き込み画面が見えます）',
+      wait: '問題をどれか1つクリアすると次に進みます',
+      waitFor: 'clear'
+    },
+    {
+      target: function () { return $('#btn-save'); },
+      title: 'ダウンロードしてみましょう',
+      text: 'クリアおめでとうございます！ :tada: 書いた内容は<b>「ダウンロード」ボタン</b>で <code>.md</code> ファイルとして保存できます。保存したファイルは「開く」ボタンで読み込んで、続きから書けます。'
+    }
+  ];
+
+  var tour = { active: false, index: 0, raf: 0 };
+  var tourEl = $('#tour');
+  var tourSpot = $('#tour-spot');
+  var tourBubble = $('#tour-bubble');
+
+  function startTour() {
+    if (aboutDialog.open) closeAbout();
+    if (workspace.getAttribute('data-view') !== 'split') setView('split');
+    tour.active = true;
+    tourEl.hidden = false;
+    showTourStep(0);
+    positionTour();
+  }
+
+  function endTour() {
+    tour.active = false;
+    tourEl.hidden = true;
+    cancelAnimationFrame(tour.raf);
+    state.tourDone = true;
+    saveState();
+  }
+
+  function tourNext() {
+    if (!tour.active) return;
+    if (tour.index >= TOUR_STEPS.length - 1) { endTour(); return; }
+    showTourStep(tour.index + 1);
+  }
+
+  function showTourStep(i) {
+    tour.index = i;
+    var step = TOUR_STEPS[i];
+    var last = i === TOUR_STEPS.length - 1;
+    $('#tour-step').textContent = 'ステップ ' + (i + 1) + ' / ' + TOUR_STEPS.length;
+    $('#tour-title').textContent = step.title;
+    $('#tour-text').innerHTML = step.text.replace(':tada:', '🎉') +
+      (step.narrowText && isNarrow() ? '<br><small>' + step.narrowText + '</small>' : '');
+    $('#tour-wait').textContent = step.wait ? '👉 ' + step.wait : '';
+    $('#tour-next').textContent = last ? '完了' : '次へ';
+    $('#tour-skip').hidden = last;
+    if (step.enter) step.enter();
+  }
+
+  // 画面の変化（パネルの開閉・リサイズ）に追従するため、表示中は毎フレーム位置を合わせる
+  function positionTour() {
+    if (!tour.active) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var target = TOUR_STEPS[tour.index].target();
+    var r = target && target.getBoundingClientRect();
+    var pad = 6;
+    var big = !r || r.width === 0 || (r.width * r.height > vw * vh * 0.6);
+
+    var top = r ? Math.max(4, r.top - pad) : vh / 2;
+    var left = r ? Math.max(4, r.left - pad) : vw / 2;
+    var width = r ? Math.min(vw - 8, r.right + pad) - left : 0;
+    var height = r ? Math.min(vh - 8, r.bottom + pad) - top : 0;
+    tourSpot.style.top = top + 'px';
+    tourSpot.style.left = left + 'px';
+    tourSpot.style.width = width + 'px';
+    tourSpot.style.height = height + 'px';
+
+    var bw = tourBubble.offsetWidth, bh = tourBubble.offsetHeight, gap = 14;
+    var bt, bl;
+    if (big) {
+      bt = isNarrow() ? vh - bh - 16 : (vh - bh) / 2; // 狭い画面では下に置いて対象を隠さない
+      bl = (vw - bw) / 2;
+    } else if (top + height + gap + bh <= vh - 8) {
+      bt = top + height + gap;
+      bl = left + width / 2 - bw / 2;
+    } else if (top - gap - bh >= 8) {
+      bt = top - gap - bh;
+      bl = left + width / 2 - bw / 2;
+    } else if (left + width + gap + bw <= vw - 8) {
+      bt = top + height / 2 - bh / 2;
+      bl = left + width + gap;
+    } else if (left - gap - bw >= 8) {
+      bt = top + height / 2 - bh / 2;
+      bl = left - gap - bw;
+    } else {
+      bt = vh - bh - 16;
+      bl = (vw - bw) / 2;
+    }
+    tourBubble.style.top = Math.max(8, Math.min(bt, vh - bh - 8)) + 'px';
+    tourBubble.style.left = Math.max(8, Math.min(bl, vw - bw - 8)) + 'px';
+
+    tour.raf = requestAnimationFrame(positionTour);
+  }
+
+  // アプリ内の操作をツアーに知らせる
+  function tourNotify(what) {
+    if (tour && tour.active && TOUR_STEPS[tour.index].waitFor === what) tourNext();
+  }
+
+  $('#tour-next').addEventListener('click', tourNext);
+  $('#tour-skip').addEventListener('click', endTour);
+  $('#btn-tour').addEventListener('click', startTour);
+  $('#btn-new').addEventListener('click', function () {
+    if (editor.value === '') tourNotify('new');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && tour.active && !aboutDialog.open) endTour();
+  });
 
   /* ---------- 初期化 ---------- */
 
@@ -864,4 +1030,5 @@
   renderDictionary();
   render();
   if (state.panel) openSidebar(state.panel);
+  if (!state.tourDone) setTimeout(startTour, 300); // 初回だけ自動でガイドを表示
 })();

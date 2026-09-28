@@ -84,15 +84,12 @@ button, input, textarea { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--border);
 }
 
-.brand { display: flex; align-items: center; gap: 8px; margin-right: auto; font-weight: 700; }
+.brand { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-right: auto; font-weight: 700; }
 .brand-mark {
-  display: inline-grid; place-items: center;
+  display: block;
   width: 32px; height: 32px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--accent-text);
-  font-size: 14px;
-  letter-spacing: -1px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(20, 24, 70, .35);
 }
 .brand-name { font-size: 16px; white-space: nowrap; }
 
@@ -163,6 +160,14 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 .segmented button + button { border-left: 1px solid var(--border); }
 .segmented button.active { background: var(--accent); color: var(--accent-text); }
+
+/* ヘッダーのボタン類は丸め切る */
+.app-header .btn,
+.app-header .segmented,
+.app-header .filename-field input { border-radius: 999px; }
+.app-header .btn { padding: 0 14px; }
+.app-header .segmented button:first-child { padding-left: 14px; }
+.app-header .segmented button:last-child { padding-right: 14px; }
 
 /* ---------- レイアウト ---------- */
 
@@ -592,6 +597,60 @@ button, input, textarea { font: inherit; color: inherit; }
   line-height: 1.6;
 }
 .practice-reset p { margin: 0 0 8px; }
+
+/* ---------- マークダウンとは ---------- */
+
+.about-dialog {
+  width: min(760px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+}
+.about-dialog[open] { display: flex; flex-direction: column; }
+.about-dialog::backdrop { background: rgba(0, 0, 0, .55); }
+.about-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 10px 20px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+}
+.about-body { overflow: auto; padding: 20px 28px 28px; }
+
+/* ---------- ツアーガイド ---------- */
+
+.tour { position: fixed; inset: 0; z-index: 90; pointer-events: none; }
+.tour[hidden] { display: none; }
+.tour-spot {
+  position: fixed;
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(0, 0, 0, .55);
+  transition: top .25s, left .25s, width .25s, height .25s;
+}
+.tour-spot.is-center { box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); }
+.tour-bubble {
+  position: fixed;
+  width: min(360px, calc(100% - 24px));
+  padding: 14px 16px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+  pointer-events: auto;
+  transition: top .25s, left .25s;
+}
+.tour-step { margin: 0 0 2px; font-size: 12px; color: var(--accent); font-weight: 700; }
+.tour-title { margin: 0 0 6px; font-size: 16px; }
+.tour-text { margin: 0 0 8px; font-size: 14px; line-height: 1.7; }
+.tour-wait { margin: 0 0 10px; font-size: 12px; color: var(--muted); }
+.tour-wait:empty { display: none; }
+.tour-actions { display: flex; justify-content: space-between; gap: 8px; }
 
 /* ---------- トースト ---------- */
 

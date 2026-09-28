@@ -11,13 +11,16 @@
       if (saved.theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
     } catch (e) { /* 既定のダークのまま */ }
   </script>
+  <link rel="icon" type="image/svg+xml" href="images/app-icon.svg">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="app-header">
     <div class="brand">
-      <span class="brand-mark">M↓</span>
+      <img class="brand-mark" src="images/app-icon.svg" alt="" width="32" height="32">
       <span class="brand-name">マークダウン練習帳</span>
+      <button type="button" class="btn btn-small" id="btn-about">❔ マークダウンとは</button>
+      <button type="button" class="btn btn-small btn-ghost" id="btn-tour" title="使い方ガイドをもう一度見る">🧭 ガイド</button>
     </div>
 
     <div class="header-group" role="group" aria-label="ファイル操作">
@@ -135,6 +138,28 @@
       </div>
     </aside>
   </main>
+
+  <dialog class="about-dialog" id="about-dialog" aria-labelledby="about-title">
+    <div class="about-head">
+      <span id="about-title">マークダウンとは</span>
+      <button type="button" class="icon-btn" id="about-close" aria-label="閉じる">✕</button>
+    </div>
+    <article class="markdown-body about-body" id="about-body"></article>
+  </dialog>
+
+  <div class="tour" id="tour" hidden>
+    <div class="tour-spot" id="tour-spot"></div>
+    <div class="tour-bubble" id="tour-bubble" role="dialog" aria-live="polite" aria-labelledby="tour-title">
+      <p class="tour-step" id="tour-step"></p>
+      <h3 class="tour-title" id="tour-title"></h3>
+      <p class="tour-text" id="tour-text"></p>
+      <p class="tour-wait" id="tour-wait"></p>
+      <div class="tour-actions">
+        <button type="button" class="btn btn-small btn-ghost" id="tour-skip">スキップ</button>
+        <button type="button" class="btn btn-small btn-primary" id="tour-next">次へ</button>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
